@@ -1,0 +1,6 @@
+/* autoprefixer를 설치하고  */
+p {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
