@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>test</title>
+  <style>
+    .data-list {
+      border: 1px solid lightsalmon;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="my-nickname"></div>
+  <input class="nickname-input" type="text" placeholder="닉네임을 입력해주세요">
+  <div class="show-nickname"></div>
+  <br>
+  <button class="nickname-btn" type="button">닉네임 등록</button>
+  <br>
+  <textarea name="text" id="text-box" cols="30" rows="10"></textarea>
+  <br>
+  <button class="save-btn" type="button">서버에 저장</button>
+  <ul class="data-list">
+  </ul>
+</body>
+
+<script>
+
+
+  const myNicknameNode = document.querySelector(".my-nickname");
+  const myNickname = localStorage.getItem("nickname");
+  if (myNickname) {
+    myNicknameNode.innerHTML = myNickname;
+  }
+
+  const btn = document.querySelector(".nickname-btn");
+  const nicknameInputNode = document.querySelector(".nickname-input");
+  const nicknameBox = document.querySelector(".show-nickname");
+  btn.addEventListener("click", function () {
+    let localStorageNickname = nicknameInputNode.value;
+    // 로컬스토리지에 저장
+    localStorage.setItem("nickname", localStorageNickname);
+    // 닉네임 보여주기(업데이트)
+    myNicknameNode.innerHTML = localStorageNickname;
+    nicknameInputNode.value = "";
+  });
+
+  // 서버에 저장 로직
+  const textBox = document.querySelector("#text-box");
+  const saveBtn = document.querySelector(".save-btn");
+
+  saveBtn.addEventListener("click", () => {
+    let loginData = {
+      method: "POST",
+      body: JSON.stringify({
+        nickname: localStorage.getItem("nickname"),
+        description: textBox.value,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch("http://localhost:3000/boards", loginData)
+      .then((res) => res.json())
+      .then((res) => {
+        getData();
+      });
+  })
+  // /서버에 저장 로직
+
+  // 서버에서 데이터 불러오는 로직
+  function getData() {
+    const dataList = document.querySelector(".data-list");
+    let loginData = {
+      method: "get",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch("http://localhost:3000/boards", loginData)
+      .then((res) => res.json())
+      .then((dataArr) => {
+        dataArr.forEach((data) => {
+          const liNode = document.createElement("li");
+          const nicknameNode = document.createElement("p");
+          const descriptionNode = document.createElement("p");
+
+          const { nickname, description } = data;
+          nicknameNode.textContent = nickname;
+          descriptionNode.textContent = description;
+
+          liNode.append(nicknameNode, descriptionNode);
+
+          dataList.appendChild(liNode);
+        })
+
+      });
+  }
+  // /서버에서 데이터 불러오는 로직
+
+
+  // 즉시실행함수
+  // 맨처음에 서버에서 데이터 다 불러오기
+  (function () {
+    getData();
+  })()
+
+
+
+
+</script>
+
+</html>
